@@ -1,13 +1,19 @@
 <script>
     import { onMount } from 'svelte'
     import { showModal } from 'svelte-native'
+    import { Template } from 'svelte-native/components'
     import GameInfoModal from './modals/GameInfoModal.svelte'
 
     let results = []
+    let savedResults = []
     let pageNumb = 1
-
+    let pageSize = 20
+    let searchbar = false
+    let abTitle = "" 
+    let searchValue = ""
+    let url = `https://rawg-video-games-database.p.rapidapi.com/games?page=${pageNumb}&page_size=${pageSize}&search=${searchValue}`
+    $: url = `https://rawg-video-games-database.p.rapidapi.com/games?page=${pageNumb}&page_size=${pageSize}&search=${searchValue}`
     const getData = () => {
-        const url = `https://rawg-video-games-database.p.rapidapi.com/games?page=${pageNumb}`
         fetch(url, {
         	"headers": {
         		"x-rapidapi-host": "rawg-video-games-database.p.rapidapi.com",
@@ -16,9 +22,9 @@
         })
         .then( response => response.json() )
         .then( json => {
-            results = json.results
+                results = json.results
             })
-        .catch(err => {
+        .catch(err => { 
         	console.log(err);
         });
     }
@@ -27,13 +33,18 @@
         getData();
     })
 
-    const nextPage = async () => {
-        pageNumb++
+/*     const test2 = async(json) => {
+        for(let i = 0; i < json.results.length; i++){
+            await results.push(json.results[i])
+            console.log(i, "-", results[i].name)
+        }
+    } */
+
+    const nextPage = () => {
+        pageSize += 10
+        console.log(pageSize)
         getData()
-    }
-    const prevPage = async () => {
-        pageNumb--
-        getData()
+        console.log(url)
     }
 
     const showGameInfo = async (result) => {
@@ -46,55 +57,108 @@
             }
         )
     }
+    const showSearchBar = () => {
+        searchbar = !searchbar
+        console.log(searchValue)
+    }
 
+    const test = () => {
+        console.log(results)
+        if(savedResults == results) {
+            console.log("yes")
+        }else{
+            console.log("No")
+        }
+    }
 
 </script>
 
 <page>
-    <actionBar title="Ghetto Game Catalog" />
+    <actionBar 
+        title={abTitle}
+        android.icon="res://icon"
+        android.iconVisibility="always" 
+        >
+            {#if searchbar}
+                <actionItem>
+                    <searchBar 
+                    hint="Search game title" 
+                    on:clear={showSearchBar}
+                    bind:text="{searchValue}"
+                    on:submit={() => {
+                        showSearchBar()
+                        getData()
+                        results = []
+                        pageNumb = 1
+                    }}
+                    />
+                </actionItem>
+            {:else}
+                <actionItem android.systemIcon="ic_menu_search" android.position="actionBar" on:tap={showSearchBar} />
+                {abTitle = "Game Catalogg"}
+            {/if}
+    </actionBar>
     <stackLayout class="main" >
-    <label class="h2" text="page {pageNumb}" style="text-alignment: center;" />
-        <stackLayout orientation="horizontal" class="btnContainer">
-            <button text='previous' on:tap='{prevPage}' />
-            <button text='next' on:tap='{nextPage}' style="margin-left:100;"/>
-        </stackLayout>
-    
-        <scrollView width="100%" height="100%">
-            <stackLayout>
-                {#each results as result}
-                    <stackLayout 
-                        class="gameContainer" 
-                        style="background-image:url('{result.background_image}')"
-                        on:tap={() => showGameInfo(result)}
-                        >
-                        <label class="gameTitle" text='{result.name}' />
-                    </stackLayout>
-                {:else}
-                    <activityIndicator busy={true} />
-                {/each}
-            </stackLayout>
-        </scrollView>
+        <flexboxLayout class="btnContainer" >
+            {#if pageNumb > 1}
+            <button text="previous" />
+            <label class="h2" text="page {pageNumb}" />
+            <button text="next"/>
+            {:else}
+            <button text="previous" style="visibility:hidden"/>
+            <label class="h2" text="page {pageNumb}" />
+            <button text="next" />
+            {/if}
+        </flexboxLayout>
+        <listView items={results} width="100%" height="100%" class="gameContainer">
+            <Template let:item={result}>
+                <absoluteLayout>
+	        	    <label class="gameTitle h3" text="{result.name}" on:tap={showGameInfo(result)} />
+                    <flexboxLayout flex-direction="row-reverse" class="iconContainer">
+                        {#each result.parent_platforms as platform}
+                                <image src="~/image/{platform.platform.slug}.png" class="icons" />
+                        {/each} 
+                    </flexboxLayout>
+                </absoluteLayout>
+                <image class="gameBackground" src="{result.background_image}"on:tap={showGameInfo(result)} />
+	        </Template>
+        </listView>
     </stackLayout>
 </page>
 
-
 <style>
     .main{
-        margin: 25;
+        margin: 0 25 50 25;
     }
-
     .gameContainer{
-        background-size: cover;
-        background-repeat: no-repeat;
-        margin: 5;
-        border-width: 1;
-        height: 200;
+        margin-top: 0;
     }
-
+    .gameBackground{
+        width: 100%;
+    }
+    .iconContainer{
+        width: 100%;
+        height: 38;
+        margin: 0;
+        justify-content: flex-end;
+    }
+    .icons{
+        width: 20;
+        height: 20;
+    }
     .gameTitle{
-        text-align: center;
-        background-color: rgba(51, 51, 51, 0.7);
-        color: #eee
+        text-align: left;
+        margin: 0;
+        background-color: rgba(158, 158, 158);
+        color: black;
+        height: 38;
+        width: 100%;
+    }
+    .btnContainer{
+        width: 100%;
+        justify-content: space-between;
+        align-items: center;
     }
 
 </style>
+
