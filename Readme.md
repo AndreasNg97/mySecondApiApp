@@ -1,23 +1,27 @@
-This is a barebones svelte-native project template. It was created directly from a nativescript core project template. It provides an easy way to get started with a svelte native project.
+# Svelte Native Game Catalog
 
-# Usage
+This is a simple Android app that uses the largest open videogame database <a href='https://api.rawg.io/docs/'>RAWG</a> to fetch and display more than 350,000 games. It is build using <a href='https://svelte-native.technology/'>svelte-native</a>, a minimalistic and concise javascript compiler for native development. Svelte-native again builds on <a href='https://www.nativescript.org/'>Nativescript</a>, so in order to build the project you will need to go through their setup guide and install the Telerik cli tools. 
 
-You can get started with this using `degit`:
+## Setup and build
+To test the project, run
+```html
 
-```bash
-npx degit halfnelson/svelte-native-template myapp
-cd myapp
 npm install
+tns run android OR tns preview
+
 ```
+## Project structure
+### App.svelte 
+...is the main entrance to the project. This file 
+- fetches game-data on mount
+- shows an initial scrollable list of game titles and game image using listView and Template.
+- has a search function that searches for games by name
+- displays a page number, a "next" button and a "previous" button.
 
-Your svelte-native app will be found in the `myapp` folder.
+### ./modals/GameInfoModal.svelte
+GameInfoModal is a component shown via svelte-native's showModal() function. It is a simple article display that
+- displays more detailed information about the game such as genres, age rating and compatible platforms, which is sent from the main component as a prop
 
-Once installed use the `tns preview`, `tns build` or `tns run` commands as for a normal NativeScript application.
+- uses closeModal() to get back to the main screen 
 
-Example: install & run application on your device:
-
-```bash
-tns run android
-# or
-tns run ios
-```
+   

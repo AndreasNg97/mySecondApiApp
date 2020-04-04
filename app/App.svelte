@@ -3,9 +3,7 @@
     import { showModal } from 'svelte-native'
     import { Template } from 'svelte-native/components'
     import GameInfoModal from './modals/GameInfoModal.svelte'
-
     let results = []
-    let savedResults = []
     let pageNumb = 1
     let searchbar = false
     let abTitle = "" 
@@ -40,9 +38,7 @@
     }
     const prevPage = () => {
         pageNumb--
-        console.log(url)
         getData()
-        console.log(url)
         results = []
     }
 
@@ -58,7 +54,6 @@
     }
     const showSearchBar = () => {
         searchbar = !searchbar
-        console.log(searchValue)
     }
 </script>
 
@@ -158,6 +153,5 @@
         justify-content: space-between;
         align-items: center;
     }
-
 </style>
 
