@@ -11,9 +11,6 @@
     let iteratedPublishers = []
     let genres
     let iteratedGenres = []
-    let gameDescriptionSwitch = true
-    let gameDescriptionClass = "gameDescriptionClosed"
-    let transBoo = "white"
     let esrbAcro
 
     const getGameInfo = () => {
@@ -63,20 +60,6 @@
         }
     }
 
-    
-    const switchClass = () => {
-        if(gameDescriptionSwitch == false){
-            gameDescriptionClass = "gameDescriptionClosed"
-            transBoo = "white"
-            gameDescriptionSwitch = true
-        }else{
-            gameDescriptionClass = "gameDescriptionOpen"
-            transBoo = "transparent"
-            gameDescriptionSwitch = false
-        }
-        console.log(iteratedGenres)
-    }
-
     onMount(() => {
         getGameInfo()
     })
@@ -91,50 +74,41 @@
             <scrollView>
                <stackLayout style='padding:10'>
                     <image src='{gameInfo.background_image}' alt="cover Image" />
-                    <label class="h5" text="Released: {gameInfo.released} " />
-                    <!-- ------ -->
+                    <flexboxLayout justifyContent="space-between">
+                        <label class="h5" text="Release date: {gameInfo.released} " />
+                        <label class="h5" text="{iteratedPublishers[0]}" />
+                    </flexboxLayout>
+                    <wrapLayout class="genresContainer">
+                        {#each iteratedGenres as genre}
+                            <label class="h3 genreText" text="{genre}"/>}
+                            <label text="  "/>
+                        {/each}
+                    </wrapLayout>
                     <flexboxLayout class="miscInfoContainer">
                         {#if gameInfo.metacritic}
-                            <stackLayout class="metaContainer"> 
+                            <stackLayout> 
                                 <label class="h3 centered" text="Metascore" />
                                 <label class="h1 metacritic"  style="background-color:rgba(0, 116, 10, 0.637)" text='{gameInfo.metacritic}' />
                             </stackLayout>
                         {:else}
-                                <absoluteLayout width="0" height="0 "></absoluteLayout>
+                            <label text="" style="display:none"/>
                         {/if}
-                        <stackLayout class="esrbContainer">
+                        <stackLayout>
                             <label class="h3 centered" text="Age rating" />
                             <image class="esrbPicture" src="~/image/{esrbAcro}.png"/>
                         </stackLayout>
                         <stackLayout>
                             <label class="h3" text="Platforms" />
-                            <wrapLayout class="platformContainer">
+                            <wrapLayout width="60">
                                 {#each iteratedPlatforms as platform}
                                     <image src="~/image/{platform}.png" width="20" height="20"/>
                                 {/each}
                             </wrapLayout>
                         </stackLayout>
-                        <stackLayout backgroundColor="blue">
-                            <label class="h3" text="Publisher" />
-                                {#each iteratedPublishers as publisher}
-                                    <label text="{publisher}" />
-                                {/each}
-                        </stackLayout>
-                        <stackLayout>
-                            <label class="h3" text="Genres" />
-                                {#each iteratedGenres as genre}
-                                    <label text="{genre}" />
-                                {/each}
-                        </stackLayout>
                     </flexboxLayout>    
-                    <!-- ------ -->
-                    <absoluteLayout class="{gameDescriptionClass} gameDescriptionContainer" >
-                        <absoluteLayout class="coverLayout" on:tap='{switchClass}'>
-                            <label style="color:{transBoo}" class="coverLayoutText" text="Tap to read more" />
-                        </absoluteLayout>
-                        <htmlView class= "gameDescription" html="{gameInfo.description}" on:tap='{switchClass}' /> 
-                    </absoluteLayout>    
-
+                    <stackLayout class="gameDescriptionContainer">
+                        <htmlView class="gameDescription" html="{gameInfo.description}"  />
+                    </stackLayout>
                 </stackLayout>
             </scrollView>
         {:else}
@@ -148,57 +122,49 @@
     .centered{
         text-align: center;
     }
+    .genresContainer{
+        width: 100%;
+        height: 100%;
+        margin-top: 8;
+        margin-bottom: 8;
+        border-bottom-width: 1;
+        border-bottom-color: rgba( 53, 53, 53, 0.3);
+        padding-top: 10;
+        padding-bottom: 10;
+        align-items: center;
+    }
+    .genreText{
+        padding: 5;
+        border-width: 1;
+    }
     .miscInfoContainer{
         margin: 1 0;
-        justify-content: space-between;
+        justify-content: space-around;
         flex-wrap: wrap;
     }
     .metacritic{
-        text-align: center;
         width: 50;
+        padding: 3 5;
         border-width: 1;
         border-radius: 5;
-        padding: 3 5;
         flex: 2;
+        text-align: center;
     }
     .esrbPicture{
         width: 50;
         height: 50;
     }
-
     .gameDescriptionContainer{
-        border-top-width: 1;
-        border-bottom-width: 1;
-        border-color: #333;
-        width: 280;
-        padding: 1;
-    }
-    .gameDescriptionClosed{
-        height: 100;
-        background: linear-gradient(0deg, #333 2%, white 36%);
-    }
-    .gameDescriptionOpen{
-        height: 100%;
-        background: linear-gradient(0deg, #333 0%, white 0%);
+        width: 100%;
+        margin-top: 10;
     }
     .gameDescription{
         width: 250;
-        font-size: 16;
         margin-top: 10;
-        margin-left: 8;
+        margin-left: 3;
+        padding-top: 15;
+        padding-left: 10;
+        border-left-width: 2;
+        font-size: 15;
     }
-    .coverLayout{
-        height: 100;
-        width: 100%;
-        background-color: transparent;
-        top: 0;
-        left: 0;
-        z-index: 1
-    }
-    .coverLayoutText{
-        top: 75;
-        left: 75;
-    }
-
-    
 </style>

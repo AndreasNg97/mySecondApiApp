@@ -7,14 +7,14 @@
     let results = []
     let savedResults = []
     let pageNumb = 1
-    let pageSize = 20
     let searchbar = false
     let abTitle = "" 
     let searchValue = ""
-    let url = `https://rawg-video-games-database.p.rapidapi.com/games?page=${pageNumb}&page_size=${pageSize}&search=${searchValue}`
-    $: url = `https://rawg-video-games-database.p.rapidapi.com/games?page=${pageNumb}&page_size=${pageSize}&search=${searchValue}`
+    let url = `https://rawg-video-games-database.p.rapidapi.com/games?page=${pageNumb}&page_size=15&search=${searchValue}`
+    $: url = `https://rawg-video-games-database.p.rapidapi.com/games?page=${pageNumb}&page_size=15&search=${searchValue}`
+    
     const getData = () => {
-        fetch(url, {
+        fetch(url = `https://rawg-video-games-database.p.rapidapi.com/games?page=${pageNumb}&page_size=15&search=${searchValue}`, {
         	"headers": {
         		"x-rapidapi-host": "rawg-video-games-database.p.rapidapi.com",
         		"x-rapidapi-key": "f9a3752d54msh9bf32664688ad4dp1c651ejsn49d236f5b883"
@@ -33,18 +33,17 @@
         getData();
     })
 
-/*     const test2 = async(json) => {
-        for(let i = 0; i < json.results.length; i++){
-            await results.push(json.results[i])
-            console.log(i, "-", results[i].name)
-        }
-    } */
-
     const nextPage = () => {
-        pageSize += 10
-        console.log(pageSize)
+        pageNumb++
+        getData()
+        results = []
+    }
+    const prevPage = () => {
+        pageNumb--
+        console.log(url)
         getData()
         console.log(url)
+        results = []
     }
 
     const showGameInfo = async (result) => {
@@ -61,27 +60,13 @@
         searchbar = !searchbar
         console.log(searchValue)
     }
-
-    const test = () => {
-        console.log(results)
-        if(savedResults == results) {
-            console.log("yes")
-        }else{
-            console.log("No")
-        }
-    }
-
 </script>
 
 <page>
-    <actionBar 
-        title={abTitle}
-        android.icon="res://icon"
-        android.iconVisibility="always" 
-        >
-            {#if searchbar}
-                <actionItem>
-                    <searchBar 
+    <actionBar title={abTitle}>
+        {#if searchbar}
+            <actionItem>
+                <searchBar 
                     hint="Search game title" 
                     on:clear={showSearchBar}
                     bind:text="{searchValue}"
@@ -91,36 +76,47 @@
                         results = []
                         pageNumb = 1
                     }}
-                    />
-                </actionItem>
-            {:else}
-                <actionItem android.systemIcon="ic_menu_search" android.position="actionBar" on:tap={showSearchBar} />
-                {abTitle = "Game Catalogg"}
-            {/if}
+                />
+            </actionItem>
+        {:else}
+            <actionItem android.systemIcon="ic_menu_search" android.position="actionBar" on:tap={showSearchBar} />
+            {abTitle = "Game Catalog"}
+            <actionItem android.systemIcon="ic_menu_rotate" android.position="actionBar" 
+                on:tap={() => {
+                    if(searchValue != "" || pageNumb != 1){
+                        results = []
+                        searchValue = ""
+                        pageNumb = 1
+                        getData()
+                    }else{
+                        return;
+                    }
+                }} />
+        {/if}
     </actionBar>
-    <stackLayout class="main" >
+    <stackLayout class="main">
         <flexboxLayout class="btnContainer" >
             {#if pageNumb > 1}
-            <button text="previous" />
-            <label class="h2" text="page {pageNumb}" />
-            <button text="next"/>
+                <button text="previous" on:tap={prevPage}/>
+                <label class="h2" text="page {pageNumb}"/>
+                <button text="next" on:tap={nextPage}/>
             {:else}
-            <button text="previous" style="visibility:hidden"/>
-            <label class="h2" text="page {pageNumb}" />
-            <button text="next" />
+                <button text="previous" style="visibility:hidden"/>
+                <label class="h2" text="page {pageNumb}"/>
+                <button text="next" on:tap={nextPage}/>
             {/if}
         </flexboxLayout>
         <listView items={results} width="100%" height="100%" class="gameContainer">
             <Template let:item={result}>
+                <image class="gameImage" src="{result.background_image}"on:tap={showGameInfo(result)} />
                 <absoluteLayout>
 	        	    <label class="gameTitle h3" text="{result.name}" on:tap={showGameInfo(result)} />
                     <flexboxLayout flex-direction="row-reverse" class="iconContainer">
                         {#each result.parent_platforms as platform}
-                                <image src="~/image/{platform.platform.slug}.png" class="icons" />
+                            <image src="~/image/{platform.platform.slug}.png" class="icons" />
                         {/each} 
                     </flexboxLayout>
                 </absoluteLayout>
-                <image class="gameBackground" src="{result.background_image}"on:tap={showGameInfo(result)} />
 	        </Template>
         </listView>
     </stackLayout>
@@ -128,31 +124,34 @@
 
 <style>
     .main{
-        margin: 0 25 50 25;
+        margin: 0 25 0 25;
     }
-    .gameContainer{
-        margin-top: 0;
-    }
-    .gameBackground{
+    .gameImage{
         width: 100%;
+        border-top-width: 1;
     }
     .iconContainer{
         width: 100%;
         height: 38;
         margin: 0;
-        justify-content: flex-end;
+        top: 20;
+        justify-content: center;
+        align-items: center;
     }
     .icons{
         width: 20;
         height: 20;
     }
     .gameTitle{
-        text-align: left;
-        margin: 0;
-        background-color: rgba(158, 158, 158);
-        color: black;
-        height: 38;
         width: 100%;
+        height: 50;
+        margin: 0;
+        border-width: 1;
+        border-top-color: rgba(133, 133, 133);
+        background-color: rgba(133, 133, 133, 0.8);
+        color: black;
+        text-align: center;
+        font-size: 18;
     }
     .btnContainer{
         width: 100%;
